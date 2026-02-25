@@ -262,6 +262,7 @@
                                         <div class="calc-input-wrapper relative h-14">
                                             <select id="duration" class="calc-input h-full appearance-none cursor-pointer bg-transparent w-full pr-8" onchange="updateResidualOptions()">
                                                 <option value="" disabled selected>Bitte wählen</option>
+                                                <option value="36">36 Monate</option>
                                                 <option value="48">48 Monate</option>
                                                 <option value="54">54 Monate</option>
                                                 <option value="60">60 Monate</option>
@@ -529,9 +530,9 @@
     <!-- LOGIC -->
     <script>
         const factors = {
-            "15": { "48": 2.15, "54": 1.94, "60": null },
-            "10": { "48": 2.25, "54": 2.03, "60": null },
-            "5":  { "48": 2.34, "54": 2.11, "60": 1.92 }
+            "15": { "36": 2.78, "48": 2.15, "54": 1.94, "60": null },
+            "10": { "36": 2.90, "48": 2.25, "54": 2.03, "60": null },
+            "5":  { "36": null, "48": 2.34, "54": 2.11, "60": 1.92 }
         };
 
         window.addEventListener('load', () => {
@@ -601,25 +602,29 @@
 
             for (let i = 0; i < options.length; i++) {
                 const val = options[i].value;
-                if (duration === "60") {
-                    if (val === "10" || val === "15") {
-                        options[i].hidden = true;
-                        options[i].disabled = true;
-                        options[i].style.display = 'none'; 
-                    } else {
-                        options[i].hidden = false;
-                        options[i].disabled = false;
-                        options[i].style.display = '';
-                    }
-                } else {
-                     options[i].hidden = false;
-                     options[i].disabled = false;
-                     options[i].style.display = '';
+                
+                // Standardmäßig erstmal alles einblenden
+                options[i].hidden = false;
+                options[i].disabled = false;
+                options[i].style.display = '';
+                
+                // Logik zum Ausblenden bestimmter Kombinationen
+                if (duration === "60" && (val === "10" || val === "15")) {
+                    options[i].hidden = true;
+                    options[i].disabled = true;
+                    options[i].style.display = 'none'; 
+                } else if (duration === "36" && val === "5") {
+                    options[i].hidden = true;
+                    options[i].disabled = true;
+                    options[i].style.display = 'none'; 
                 }
             }
 
+            // Automatischer Fallback, falls die aktuelle Auswahl ungültig wird
             if (duration === "60" && (residualSelect.value === "10" || residualSelect.value === "15")) {
                 residualSelect.value = "5";
+            } else if (duration === "36" && residualSelect.value === "5") {
+                residualSelect.value = "10";
             }
         }
 
