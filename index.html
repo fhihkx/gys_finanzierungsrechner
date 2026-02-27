@@ -79,13 +79,17 @@
             padding: 9px; 
             border-radius: 14px;
             box-shadow: 0 4px 25px rgba(0,0,0,0.05);
-            display: inline-flex;
+            display: flex;
+            width: 100%;
+            max-width: 900px; /* Begrenzt die maximale Breite */
             flex-wrap: wrap;
             justify-content: center;
             gap: 7px; 
         }
         .tab-btn {
-            padding: 20px 56px; 
+            padding: 20px 10px; 
+            flex: 1; /* Macht alle Knöpfe exakt gleich groß */
+            text-align: center;
             border-radius: 8px;
             font-weight: 700;
             font-size: 18px; 
@@ -109,7 +113,8 @@
             background: #F3F5F7;
             border: 2px solid #E5E7EB;
             border-radius: 8px;
-            padding: 12px 20px;
+            padding: 14px 20px;
+            min-height: 56px;
             transition: all 0.2s;
             display: flex;
             align-items: center;
@@ -127,8 +132,14 @@
             outline: none;
             font-weight: 700;
             color: #111827;
-            font-size: 20px;
-            padding: 4px 0;
+            font-size: 18px;
+            padding: 0;
+            margin: 0;
+            line-height: normal;
+        }
+        select.calc-input {
+            padding-right: 30px;
+            text-overflow: ellipsis;
         }
         
         /* HIDE INPUT SPINNERS (Arrows) */
@@ -157,11 +168,12 @@
             background-color: #F3F5F7;
             border: 2px solid #E5E7EB;
             border-radius: 8px;
-            padding: 12px 16px;
+            padding: 14px 16px;
             font-weight: 500;
             color: #111827;
             outline: none;
             transition: all 0.2s;
+            line-height: normal;
         }
         .form-input:focus {
             border-color: #003E7E;
@@ -189,9 +201,9 @@
         }
 
         /* Mobile Adjustments */
-        @media (max-width: 640px) {
-            .tab-btn { padding: 16px 32px; font-size: 14px; width: 100%; }
-            .tab-nav { border-radius: 12px; width: 100%; }
+        @media (max-width: 768px) {
+            .tab-nav { flex-direction: column; width: 100%; }
+            .tab-btn { width: 100%; padding: 16px; font-size: 16px; white-space: normal; }
         }
     </style>
 </head>
@@ -200,11 +212,11 @@
     <!-- HEADER -->
     <header class="bg-gys-blue sticky top-0 z-50 border-b border-gys-blueHover transition-all duration-300 shadow-md">
         <div class="max-w-[1400px] mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
-            <a href="https://www.gys-schweissen.com/" target="_blank" class="flex items-center group shrink-0">
+            <a href="https://www.gys-schweissen.com/" target="_blank" rel="noopener noreferrer" class="flex items-center group shrink-0">
                 <img src="gys_logo.png" alt="GYS Logo" class="h-10 md:h-14 lg:h-16 object-contain group-hover:opacity-80 transition-opacity">
             </a>
             <div class="flex items-center gap-6">
-                <a href="https://www.gys-schweissen.com/spip.php?page=contact&no=2&lang=de" target="_blank" class="bg-gys-yellow text-gys-dark px-6 py-3 rounded-md text-sm font-bold tracking-wide hover:bg-gys-yellowHover transition-colors shadow-md whitespace-nowrap">
+                <a href="https://www.gys-schweissen.com/spip.php?page=contact&no=2&lang=de" target="_blank" rel="noopener noreferrer" class="bg-gys-yellow text-gys-dark px-6 py-3 rounded-md text-sm font-bold tracking-wide hover:bg-gys-yellowHover transition-colors shadow-md whitespace-nowrap">
                     Kontakt
                 </a>
             </div>
@@ -230,6 +242,7 @@
             <div class="tab-nav">
                 <button onclick="switchTab('calculator')" id="tab-calculator" class="tab-btn active">Rechner</button>
                 <button onclick="switchTab('why')" id="tab-why" class="tab-btn">Ihre Vorteile</button>
+                <button onclick="switchTab('compare')" id="tab-compare" class="tab-btn">Leasing vs. Mietkauf</button>
             </div>
         </div>
 
@@ -250,17 +263,17 @@
                             <div class="space-y-8 lg:space-y-10 w-full">
                                 <div>
                                     <label class="calc-label">Anschaffungspreis (Netto)</label>
-                                    <div class="calc-input-wrapper h-14">
+                                    <div class="calc-input-wrapper">
                                         <span class="text-gray-400 font-bold mr-4 text-xl">€</span>
-                                        <input type="text" id="price" class="calc-input h-full" placeholder="0,00" inputmode="decimal" oninput="formatPriceInput(this)">
+                                        <input type="text" id="price" class="calc-input" placeholder="0,00" inputmode="decimal" oninput="formatPriceInput(this)">
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
                                         <label class="calc-label">Laufzeit</label>
-                                        <div class="calc-input-wrapper relative h-14">
-                                            <select id="duration" class="calc-input h-full appearance-none cursor-pointer bg-transparent w-full pr-8" onchange="updateResidualOptions()">
+                                        <div class="calc-input-wrapper relative">
+                                            <select id="duration" class="calc-input appearance-none cursor-pointer bg-transparent w-full pr-8" onchange="updateResidualOptions()">
                                                 <option value="" disabled selected>Bitte wählen</option>
                                                 <option value="36">36 Monate</option>
                                                 <option value="48">48 Monate</option>
@@ -275,8 +288,8 @@
 
                                     <div>
                                         <label class="calc-label">Restwert</label>
-                                        <div class="calc-input-wrapper relative h-14">
-                                            <select id="residual" class="calc-input h-full appearance-none cursor-pointer bg-transparent w-full pr-8">
+                                        <div class="calc-input-wrapper relative">
+                                            <select id="residual" class="calc-input appearance-none cursor-pointer bg-transparent w-full pr-8">
                                                 <option value="" disabled selected>Bitte wählen</option>
                                                 <option value="5">5 %</option>
                                                 <option value="10">10 %</option>
@@ -290,7 +303,7 @@
                                 </div>
 
                                 <div class="pt-2">
-                                    <button onclick="calculate()" class="w-full h-14 bg-gys-blue text-white font-bold rounded-lg text-sm hover:bg-gys-blueHover transition-all shadow-xl hover:-translate-y-1 flex justify-center items-center gap-3 group tracking-wider">
+                                    <button onclick="calculate()" class="w-full py-4 bg-gys-blue text-white font-bold rounded-lg text-sm hover:bg-gys-blueHover transition-all shadow-xl hover:-translate-y-1 flex justify-center items-center gap-3 group tracking-wider">
                                         Rate berechnen 
                                         <i class="fa-solid fa-calculator group-hover:rotate-12 transition-transform"></i>
                                     </button>
@@ -357,6 +370,19 @@
                             <p class="text-gray-500 mb-8 text-sm font-medium">Bitte geben Sie Ihre Daten ein, um das unverbindliche Angebot als PDF zu erhalten.</p>
 
                             <form class="space-y-4 w-full" id="contact-form" onsubmit="event.preventDefault(); downloadOfferPDF();">
+                                
+                                <!-- NEU: Artikel-Block mit Trennlinie (border-b) und extra Platz (pb-8 mb-4) -->
+                                <div class="space-y-4 border-b border-gray-200 pb-8 mb-4">
+                                    <div>
+                                        <label class="calc-label">Artikelnummer</label>
+                                        <input type="text" id="form-artikelnummer" class="form-input" required>
+                                    </div>
+                                    <div>
+                                        <label class="calc-label">Artikelbezeichnung</label>
+                                        <input type="text" id="form-artikelbezeichnung" class="form-input" required>
+                                    </div>
+                                </div>
+
                                 <div>
                                     <label class="calc-label">Finanzierungsart</label>
                                     <div class="relative">
@@ -393,6 +419,17 @@
                                     <div>
                                         <label class="calc-label">Nachname</label>
                                         <input type="text" id="form-nachname" class="form-input" required>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="calc-label">Telefonnummer</label>
+                                        <input type="tel" id="form-telefon" class="form-input" required>
+                                    </div>
+                                    <div>
+                                        <label class="calc-label">E-Mail</label>
+                                        <input type="email" id="form-email" class="form-input" required>
                                     </div>
                                 </div>
 
@@ -477,11 +514,12 @@
             </div>
 
             <!-- VIEW 2: BENEFITS -->
-            <div id="view-why" class="view-content absolute inset-x-0 top-0 w-full opacity-0 pointer-events-none transition-all duration-300">
+            <!-- Neu: style="display: none;" hinzugefügt, um Geister-Scrolling auf Startseite zu verhindern -->
+            <div id="view-why" class="view-content absolute inset-x-0 top-0 w-full opacity-0 pointer-events-none transition-all duration-300" style="display: none;">
                 <div class="bg-white rounded-xl shadow-card p-8 md:p-16 lg:p-24 border border-gray-100 flex flex-col justify-center">
                     <div class="text-center mb-16">
                         <h2 class="text-3xl md:text-4xl font-black text-gys-blue mb-4 font-heading">Warum Finanzierung?</h2>
-                        <p class="text-gray-500 text-lg font-medium">Intelligentes Wachstum für Ihre Werkstatt & Produktion.</p>
+                        <p class="text-gray-500 text-xl font-medium">Intelligentes Wachstum für Ihre Werkstatt & Produktion.</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -489,22 +527,87 @@
                             <div class="w-20 h-20 bg-white rounded-lg flex items-center justify-center text-gys-blue text-3xl shadow-sm mb-8 group-hover:bg-gys-yellow group-hover:text-gys-dark transition-colors">
                                 <i class="fa-solid fa-wallet"></i>
                             </div>
-                            <h3 class="font-black text-2xl mb-4 text-gys-dark">Liquidität</h3>
-                            <p class="text-base text-gray-600 leading-relaxed font-medium">Keine hohe Einmalinvestition. Sie behalten Ihr Kapital für das operative Geschäft.</p>
+                            <h3 class="font-black text-3xl mb-4 text-gys-dark">Liquidität</h3>
+                            <p class="text-lg text-gray-600 leading-relaxed font-medium">Keine hohe Einmalinvestition. Sie behalten Ihr Kapital für das operative Geschäft.</p>
                         </div>
                         <div class="p-8 md:p-10 rounded-xl bg-gray-50 border border-transparent hover:border-gys-yellow hover:bg-white hover:shadow-xl transition-all duration-300 group">
                             <div class="w-20 h-20 bg-white rounded-lg flex items-center justify-center text-gys-blue text-3xl shadow-sm mb-8 group-hover:bg-gys-yellow group-hover:text-gys-dark transition-colors">
                                 <i class="fa-solid fa-chart-line"></i>
                             </div>
-                            <h3 class="font-black text-2xl mb-4 text-gys-dark">Planbarkeit</h3>
-                            <p class="text-base text-gray-600 leading-relaxed font-medium">Konstante, feste Raten über die gesamte Laufzeit erleichtern Ihre Budgetplanung.</p>
+                            <h3 class="font-black text-3xl mb-4 text-gys-dark">Planbarkeit</h3>
+                            <p class="text-lg text-gray-600 leading-relaxed font-medium">Konstante, feste Raten über die gesamte Laufzeit erleichtern Ihre Budgetplanung.</p>
                         </div>
                         <div class="p-8 md:p-10 rounded-xl bg-gray-50 border border-transparent hover:border-gys-yellow hover:bg-white hover:shadow-xl transition-all duration-300 group">
                             <div class="w-20 h-20 bg-white rounded-lg flex items-center justify-center text-gys-blue text-3xl shadow-sm mb-8 group-hover:bg-gys-yellow group-hover:text-gys-dark transition-colors">
                                 <i class="fa-solid fa-bolt"></i>
                             </div>
-                            <h3 class="font-black text-2xl mb-4 text-gys-dark">Technologie</h3>
-                            <p class="text-base text-gray-600 leading-relaxed font-medium">Nutzen Sie immer die modernsten GYS Schweiß- und Ladesysteme in Ihrem Betrieb.</p>
+                            <h3 class="font-black text-3xl mb-4 text-gys-dark">Technologie</h3>
+                            <p class="text-lg text-gray-600 leading-relaxed font-medium">Nutzen Sie immer die modernsten GYS Schweiß- und Ladesysteme in Ihrem Betrieb.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: LEASING VS MIETKAUF VERGLEICH -->
+            <!-- Neu: style="display: none;" hinzugefügt -->
+            <div id="view-compare" class="view-content absolute inset-x-0 top-0 w-full opacity-0 pointer-events-none transition-all duration-300" style="display: none;">
+                <div class="bg-white rounded-xl shadow-card p-8 md:p-16 lg:p-24 border border-gray-100 flex flex-col justify-center">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl md:text-4xl font-black text-gys-blue mb-4 font-heading">Die richtige Finanzierung finden</h2>
+                        <p class="text-gray-500 text-xl font-medium">Leasing oder Mietkauf? Vergleichen Sie die Vorteile beider Modelle.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Leasing Card -->
+                        <div class="p-8 md:p-10 rounded-xl bg-gray-50 border border-transparent hover:border-gys-blue hover:bg-white hover:shadow-xl transition-all duration-300 group flex flex-col h-full">
+                            <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center text-gys-blue text-2xl shadow-sm mb-6 group-hover:bg-gys-blue group-hover:text-white transition-colors">
+                                <i class="fa-solid fa-file-contract"></i>
+                            </div>
+                            <h3 class="font-black text-3xl mb-4 text-gys-dark">Leasing</h3>
+                            <p class="text-gray-600 font-medium mb-8 text-lg">Sie zahlen nur für die Nutzung der GYS Ausrüstung, ähnlich wie bei einer Miete. Ideal, um technisch immer auf dem neuesten Stand zu bleiben.</p>
+                            
+                            <div class="mt-auto">
+                                <ul class="space-y-5 text-base text-gray-700">
+                                    <li class="flex items-start gap-3">
+                                        <i class="fa-solid fa-check text-gys-yellow mt-1 text-lg"></i> 
+                                        <span><strong>Bilanzneutral:</strong> Investition taucht nicht in der Bilanz auf und schont die Eigenkapitalquote.</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <i class="fa-solid fa-check text-gys-yellow mt-1 text-lg"></i> 
+                                        <span><strong>Steuervorteil:</strong> Die Leasingraten sind in der Regel als Betriebsausgaben voll steuerlich absetzbar.</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <i class="fa-solid fa-check text-gys-yellow mt-1 text-lg"></i> 
+                                        <span><strong>Automatischer Erwerb:</strong> Am Ende der Laufzeit erwerben Sie das Gerät automatisch und es geht in Ihren Besitz über.</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Mietkauf Card -->
+                        <div class="p-8 md:p-10 rounded-xl bg-gray-50 border border-transparent hover:border-gys-blue hover:bg-white hover:shadow-xl transition-all duration-300 group flex flex-col h-full">
+                            <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center text-gys-blue text-2xl shadow-sm mb-6 group-hover:bg-gys-blue group-hover:text-white transition-colors">
+                                <i class="fa-solid fa-handshake"></i>
+                            </div>
+                            <h3 class="font-black text-3xl mb-4 text-gys-dark">Mietkauf</h3>
+                            <p class="text-gray-600 font-medium mb-8 text-lg">Der klassische Weg zum Eigentum. Nach Zahlung der vereinbarten Raten geht die Ausrüstung am Ende automatisch in Ihren Besitz über.</p>
+                            
+                            <div class="mt-auto">
+                                <ul class="space-y-5 text-base text-gray-700">
+                                    <li class="flex items-start gap-3">
+                                        <i class="fa-solid fa-check text-gys-yellow mt-1 text-lg"></i> 
+                                        <span><strong>Automatisches Eigentum:</strong> Mit Zahlung der letzten Rate gehört die Ausrüstung zu 100 % Ihnen.</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <i class="fa-solid fa-check text-gys-yellow mt-1 text-lg"></i> 
+                                        <span><strong>Bilanzierung:</strong> Die Maschine wird direkt in Ihrem eigenen Anlagevermögen aktiviert.</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <i class="fa-solid fa-check text-gys-yellow mt-1 text-lg"></i> 
+                                        <span><strong>Abschreibung:</strong> Sie profitieren selbst von den steuerlichen Abschreibungsmöglichkeiten (AfA).</span>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -513,16 +616,16 @@
         </div>
     </main>
 
-    <footer class="bg-white border-t border-gray-200 py-12 mt-auto relative z-20">
+    <!-- Z-Index auf 30 erhöht und Links mit rel="noopener noreferrer" für Sicherheit ausgestattet -->
+    <footer class="bg-white border-t border-gray-200 py-12 mt-auto relative z-30">
         <div class="max-w-[1400px] mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-            <a href="https://www.gys-schweissen.com/" target="_blank" class="flex items-center gap-2 group">
+            <a href="https://www.gys-schweissen.com/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 group">
                 <img src="gys_logo.png" alt="GYS Logo" class="h-10 md:h-12 object-contain group-hover:opacity-80 transition-opacity">
             </a>
-            <div class="flex flex-wrap items-center gap-4 md:gap-8 text-sm font-bold text-gys-dark tracking-wide justify-center md:justify-end">
-                <a href="https://www.gys-schweissen.com/spip.php?page=historique&lang=de" target="_blank" class="hover:text-gys-blue transition-colors">Historie</a>
-                <a href="https://www.gys-schweissen.com/spip.php?page=mentions&lang=de" target="_blank" class="hover:text-gys-blue transition-colors">Impressum</a>
-                <a href="https://www.gys-schweissen.com/spip.php?page=politique_confidentialite&lang=de" target="_blank" class="hover:text-gys-blue transition-colors">Datenschutzerklärung</a>
-                <a href="https://www.gys-schweissen.com/spip.php?page=cgv&lang=de" target="_blank" class="hover:text-gys-blue transition-colors">Allgemeine Geschäftsbedingungen</a>
+            <div class="flex flex-wrap items-center gap-4 md:gap-8 text-sm font-bold text-gys-dark tracking-wide justify-center md:justify-end relative z-40">
+                <a href="https://www.gys-schweissen.com/spip.php?page=verbindung&id_article=157&lang=de" target="_blank" rel="noopener noreferrer" class="hover:text-gys-blue transition-colors">Historie</a>
+                <a href="https://www.gys-schweissen.com/spip.php?page=impressum&id_article=380&lang=de" target="_blank" rel="noopener noreferrer" class="hover:text-gys-blue transition-colors">Impressum</a>
+                <a href="https://www.gys-schweissen.com/spip.php?page=rgpd&lang=de&keep=de" target="_blank" rel="noopener noreferrer" class="hover:text-gys-blue transition-colors">Datenschutzerklärung</a>
             </div>
         </div>
     </footer>
@@ -562,17 +665,33 @@
             });
 
             document.querySelectorAll('.view-content').forEach(view => {
-                view.style.opacity = '0';
-                view.style.pointerEvents = 'none';
-                view.style.zIndex = '0';
+                if (view.id !== 'view-' + tabId) {
+                    view.style.opacity = '0';
+                    view.style.pointerEvents = 'none';
+                    view.style.zIndex = '0';
+                    
+                    // NEU: Nach der Ausblend-Animation (300ms) komplett aus dem DOM nehmen
+                    // Das verhindert den unsichtbaren Überlapp und behebt die Footer-Links
+                    setTimeout(() => {
+                        if (view.style.opacity === '0') {
+                            view.style.display = 'none';
+                        }
+                    }, 300);
+                }
             });
 
             const activeView = document.getElementById('view-' + tabId);
             if(activeView) {
-                activeView.style.opacity = '1';
-                activeView.style.pointerEvents = 'auto';
-                activeView.style.zIndex = '10';
-                setTimeout(() => adjustContainerHeight(tabId), 10);
+                // NEU: Erst Block setzen, dann kurz darauf sanft einblenden
+                activeView.style.display = 'block';
+                
+                setTimeout(() => {
+                    activeView.style.opacity = '1';
+                    activeView.style.pointerEvents = 'auto';
+                    activeView.style.zIndex = '10';
+                }, 20);
+                
+                setTimeout(() => adjustContainerHeight(tabId), 40);
             }
         }
 
@@ -631,7 +750,7 @@
             } else if (duration === "36" && residualSelect.value === "5") {
                 residualSelect.value = "10";
             } else if (duration === "54" && residualSelect.value === "15") {
-                // NEU: Fallback auf 10%, wenn 54 Monate gewählt und 15% aktiv war
+                // Fallback auf 10%, wenn 54 Monate gewählt und 15% aktiv war
                 residualSelect.value = "10";
             }
         }
@@ -760,6 +879,10 @@
                 const anrede = document.getElementById('form-anrede').value;
                 const vorname = document.getElementById('form-vorname').value;
                 const nachname = document.getElementById('form-nachname').value;
+                const telefon = document.getElementById('form-telefon').value;
+                const email = document.getElementById('form-email').value;
+                const artikelnummer = document.getElementById('form-artikelnummer').value;
+                const artikelbezeichnung = document.getElementById('form-artikelbezeichnung').value;
                 const firma = document.getElementById('form-firma').value;
                 const strasse = document.getElementById('form-strasse').value;
                 const plz = document.getElementById('form-plz').value;
@@ -797,20 +920,32 @@
 
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "normal");
-                doc.text([firma, `${anrede} ${vorname} ${nachname}`, strasse, `${plz} ${ort}`], 20, 45);
+                // Adressblock oben links um Telefon und E-Mail erweitert
+                doc.text([
+                    firma, 
+                    `${anrede} ${vorname} ${nachname}`, 
+                    strasse, 
+                    `${plz} ${ort}`,
+                    `Tel.: ${telefon}`,
+                    `E-Mail: ${email}`
+                ], 20, 45);
 
                 doc.text(`Aachen, ${datum}`, 190, 60, { align: "right" });
 
                 doc.setFontSize(11);
                 doc.setFont("helvetica", "bold");
-                doc.text(`Finanzierungsangebot: ${art}`, 20, 80);
+                doc.text(`Finanzierungsangebot: ${art}`, 20, 85);
+                
+                // NEU: Artikelnummer und -bezeichnung in Fettdruck hinzufügen
+                doc.text(`${artikelnummer} - ${artikelbezeichnung}`, 20, 92);
 
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "normal");
-                doc.text(salutation, 20, 95);
-                doc.text("vielen Dank für das entgegengebrachte Vertrauen! Wie folgt bieten wir Ihnen unverbindlich an:", 20, 105);
+                // Y-Werte um jeweils 7mm nach unten geschoben für den neuen Text
+                doc.text(salutation, 20, 107);
+                doc.text("vielen Dank für das entgegengebrachte Vertrauen! Wie folgt bieten wir Ihnen unverbindlich an:", 20, 117);
 
-                let y = 120;
+                let y = 132; // Auch die Tabelle rückt weiter nach unten
                 const rowH = 7;
                 const drawRow = (label, val, unit) => {
                     doc.setFont("helvetica", "normal");
@@ -839,6 +974,10 @@
 
                 doc.setFont("helvetica", "normal");
                 doc.text("Die oben genannten Preise verstehen sich netto, zuzüglich der gesetzlichen Mehrwertsteuer.", 20, y);
+                y += 10; // Abstand angepasst für den neuen Satz
+
+                // NEUER SATZ:
+                doc.text(["Auf Wunsch fragen wir dieses Finanzierungsangebot gerne verbindlich für Sie über unseren", "Finanzierungspartner an."], 20, y);
                 y += 15;
 
                 doc.text(["Wir freuen uns, für Sie tätig werden zu können und sichern Ihnen bereits jetzt eine faire, schnelle", 
@@ -878,6 +1017,10 @@
                 const templateParams = {
                     firma_name: firma,
                     kontakt_name: `${anrede} ${vorname} ${nachname}`,
+                    telefon: telefon,
+                    email: email,
+                    artikelnummer: artikelnummer,
+                    artikelbezeichnung: artikelbezeichnung,
                     adresse: strasse,
                     plz_ort: `${plz} ${ort}`,
                     finanzierungsart: art,
