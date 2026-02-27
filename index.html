@@ -638,8 +638,26 @@
             "5":  { "36": null, "48": 2.45, "54": 2.21, "60": 2.02 }
         };
 
+        // --- ROBUSTE HÖHENBERECHNUNG (RESIZEOBSERVER) ---
+        let resizeObserver;
+        function setupResizeObserver() {
+            const container = document.getElementById('content-container');
+            resizeObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    if (entry.target.style.display !== 'none' && entry.target.style.opacity !== '0') {
+                        container.style.height = entry.target.scrollHeight + 'px';
+                    }
+                }
+            });
+            
+            document.querySelectorAll('.view-content').forEach(view => {
+                resizeObserver.observe(view);
+            });
+        }
+
         window.addEventListener('load', () => {
             switchTab('calculator');
+            setupResizeObserver();
         });
 
         window.addEventListener('resize', () => {
@@ -654,7 +672,9 @@
             const container = document.getElementById('content-container');
             const activeView = document.getElementById('view-' + tabId);
             if(activeView) {
-                container.style.height = activeView.offsetHeight + 'px';
+                requestAnimationFrame(() => {
+                    container.style.height = activeView.scrollHeight + 'px';
+                });
             }
         }
 
@@ -776,8 +796,11 @@
                 errorText.innerText = `Diese Kombination (${duration} Monate / ${residual}%) ist aktuell nicht verfügbar.`;
                 errorMsg.classList.remove('hidden');
                 nextBtn.disabled = true;
+                adjustContainerHeight('calculator'); // Container Höhe anpassen
             } else {
                 errorMsg.classList.add('hidden');
+                adjustContainerHeight('calculator'); // Container Höhe anpassen
+                
                 if (price && price > 0) {
                     const rate = price * (factor / 100);
                     resultDisplay.innerText = formatCurrency(rate);
@@ -817,14 +840,24 @@
                 
                 step2.classList.remove('hidden-step');
                 step2.classList.add('active-step', 'flex');
+                
+                // Höhe anpassen und für Mobile-Nutzer nach oben scrollen
+                setTimeout(() => adjustContainerHeight('calculator'), 50);
+                setTimeout(() => adjustContainerHeight('calculator'), 300);
+                window.scrollTo({ top: document.getElementById('content-container').offsetTop - 100, behavior: 'smooth' });
+                
             } else {
                 step2.classList.remove('active-step', 'flex');
                 step2.classList.add('hidden-step');
 
                 step1.classList.remove('hidden-step');
                 step1.classList.add('active-step', 'flex');
+                
+                // Höhe anpassen und scrollen
+                setTimeout(() => adjustContainerHeight('calculator'), 50);
+                setTimeout(() => adjustContainerHeight('calculator'), 300);
+                window.scrollTo({ top: document.getElementById('content-container').offsetTop - 100, behavior: 'smooth' });
             }
-            setTimeout(() => adjustContainerHeight('calculator'), 50);
         }
 
         function getBase64Logo() {
