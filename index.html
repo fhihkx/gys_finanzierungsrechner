@@ -530,9 +530,9 @@
     <!-- LOGIC -->
     <script>
         const factors = {
-            "15": { "36": 2.78, "48": 2.15, "54": 1.94, "60": null },
-            "10": { "36": 2.90, "48": 2.25, "54": 2.03, "60": null },
-            "5":  { "36": null, "48": 2.34, "54": 2.11, "60": 1.92 }
+            "15": { "36": 2.93, "48": 2.27, "54": null, "60": null },
+            "10": { "36": 3.06, "48": 2.36, "54": 2.13, "60": null },
+            "5":  { "36": null, "48": 2.45, "54": 2.21, "60": 2.02 }
         };
 
         window.addEventListener('load', () => {
@@ -617,6 +617,11 @@
                     options[i].hidden = true;
                     options[i].disabled = true;
                     options[i].style.display = 'none'; 
+                } else if (duration === "54" && val === "15") {
+                    // NEU: 15% bei 54 Monaten ausblenden
+                    options[i].hidden = true;
+                    options[i].disabled = true;
+                    options[i].style.display = 'none'; 
                 }
             }
 
@@ -624,6 +629,9 @@
             if (duration === "60" && (residualSelect.value === "10" || residualSelect.value === "15")) {
                 residualSelect.value = "5";
             } else if (duration === "36" && residualSelect.value === "5") {
+                residualSelect.value = "10";
+            } else if (duration === "54" && residualSelect.value === "15") {
+                // NEU: Fallback auf 10%, wenn 54 Monate gewählt und 15% aktiv war
                 residualSelect.value = "10";
             }
         }
