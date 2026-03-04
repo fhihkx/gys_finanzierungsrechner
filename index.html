@@ -672,7 +672,7 @@
 
         // --- SICHERHEITS-UPDATE: RATENBEGRENZUNG (Client-Side Rate Limiting) ---
         // Verhindert massenhaften Bot-Spam / versehentliche Doppel-Klicks
-        const RATE_LIMIT_COOLDOWN_MS = 60000; // 60 Sekunden Sperre
+        const RATE_LIMIT_COOLDOWN_MS = 30000; // Angepasst auf 30 Sekunden
         const RATE_LIMIT_KEY = 'gys_last_submission';
 
         function checkRateLimit() {
@@ -970,11 +970,28 @@
             const btn = document.getElementById('submit-btn');
             const rateLimitMsg = document.getElementById('rate-limit-msg');
             
-            // 1. Rate Limit prüfen (429 Too Many Requests Logik)
-            if (!checkRateLimit()) {
-                rateLimitMsg.classList.remove('hidden');
-                adjustContainerHeight('calculator');
-                return;
+            // 1. Rate Limit prüfen (Mit automatischem Freischalten)
+            const lastSubmit = localStorage.getItem(RATE_LIMIT_KEY);
+            if (lastSubmit) {
+                const timePassed = Date.now() - parseInt(lastSubmit, 10);
+                if (timePassed < RATE_LIMIT_COOLDOWN_MS) {
+                    const timeLeft = RATE_LIMIT_COOLDOWN_MS - timePassed;
+                    
+                    rateLimitMsg.classList.remove('hidden');
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed'); // Graut den Button optisch aus
+                    adjustContainerHeight('calculator');
+
+                    // Setzt einen unsichtbaren Timer, der die Warnung nach Ablauf genau entfernt
+                    setTimeout(() => {
+                        rateLimitMsg.classList.add('hidden');
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        adjustContainerHeight('calculator');
+                    }, timeLeft);
+                    
+                    return;
+                }
             }
             rateLimitMsg.classList.add('hidden');
 
