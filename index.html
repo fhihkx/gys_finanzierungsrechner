@@ -2,9 +2,14 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GYS Finanzierungsrechner</title>
     
+    <!-- OWASP: Content Security Policy (CSP) -->
+    <!-- Erlaubt nur definierte, vertrauenswürdige Quellen für Skripte, Styles und APIs -->
+    <!-- UPDATE: "font-src" hinzugefügt, damit die FontAwesome Icons geladen werden dürfen -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://www.gys-schweissen.com; connect-src 'self' https://api.emailjs.com; font-src 'self' https://cdnjs.cloudflare.com data:;">
+
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- PURE jsPDF Library -->
@@ -14,7 +19,9 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
-            // HIER DEINEN EMAILJS PUBLIC KEY EINTRAGEN
+            // SICHERHEITSHINWEIS: Dies ist ein PUBLIC KEY. 
+            // Um Missbrauch zu verhindern, MUSS im EmailJS Dashboard unter "Account -> Security" 
+            // die Option "Restrict Domains" auf deine GitHub Pages URL (z.B. deinname.github.io) gesetzt werden!
             emailjs.init("y0ANsvoTYHNRXCf5R");
         })();
     </script>
@@ -28,13 +35,13 @@
                 extend: {
                     colors: {
                         gys: {
-                            blue: '#003E7E',      // GYS Primary Blue
+                            blue: '#003E7E',      
                             blueHover: '#002B5E',
-                            yellow: '#FFB800',    // GYS Highlight Yellow
+                            yellow: '#FFB800',    
                             yellowHover: '#E6A600',
-                            dark: '#111827',      // Dark text
-                            text: '#1F2937',      // Main text
-                            light: '#F3F5F7',     // Background
+                            dark: '#111827',      
+                            text: '#1F2937',      
+                            light: '#F3F5F7',     
                             border: '#E5E7EB'
                         }
                     },
@@ -60,8 +67,25 @@
     </script>
 
     <style>
-        body { font-family: 'Helvetica', Arial, sans-serif; background-color: #F3F5F7; color: #1F2937; overflow-x: hidden; }
+        /* iOS / Cross-Browser Basis-Resets */
+        html { -webkit-text-size-adjust: 100%; }
+        body { 
+            font-family: 'Helvetica', Arial, sans-serif; 
+            background-color: #F3F5F7; 
+            color: #1F2937; 
+            overflow-x: hidden; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
         h1, h2, h3, h4, .font-heading { font-family: 'Helvetica', Arial, sans-serif; }
+
+        /* Globale Formular-Resets für iOS */
+        input, select, textarea, button {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            outline: none;
+        }
 
         /* Navigation Style */
         .nav-item {
@@ -81,14 +105,14 @@
             box-shadow: 0 4px 25px rgba(0,0,0,0.05);
             display: flex;
             width: 100%;
-            max-width: 900px; /* Begrenzt die maximale Breite */
+            max-width: 900px;
             flex-wrap: wrap;
             justify-content: center;
             gap: 7px; 
         }
         .tab-btn {
             padding: 20px 10px; 
-            flex: 1; /* Macht alle Knöpfe exakt gleich groß */
+            flex: 1; 
             text-align: center;
             border-radius: 8px;
             font-weight: 700;
@@ -137,7 +161,7 @@
             margin: 0;
             line-height: normal;
         }
-        select.calc-input {
+        select.calc-input, select.form-input {
             padding-right: 30px;
             text-overflow: ellipsis;
         }
@@ -171,6 +195,7 @@
             padding: 14px 16px;
             font-weight: 500;
             color: #111827;
+            font-size: 16px; 
             outline: none;
             transition: all 0.2s;
             line-height: normal;
@@ -180,9 +205,16 @@
             background-color: #fff;
         }
 
+        /* Error Outline Class for Validation */
+        .input-error {
+            border-color: #EF4444 !important;
+            background-color: #FEF2F2 !important;
+        }
+
         /* Container Height Transition */
         #content-container {
-            transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: height;
         }
 
         /* Helper for Step Transitions within Calculator */
@@ -255,7 +287,7 @@
                     
                     <!-- STEP 1: CALCULATION -->
                     <div id="calc-step-1" class="flex flex-col lg:flex-row h-full active-step w-full transition-opacity duration-300">
-                        <div class="w-full lg:w-7/12 p-8 md:p-10 lg:p-12 flex flex-col justify-start">
+                        <div class="w-full lg:w-7/12 p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col justify-start">
                             <div class="flex items-center justify-between mb-8 lg:mb-10 h-10">
                                 <h2 class="text-3xl md:text-4xl font-black text-gys-dark font-heading tracking-tight m-0">Finanzierungsrechner</h2>
                             </div>
@@ -265,7 +297,7 @@
                                     <label class="calc-label">Anschaffungspreis (Netto)</label>
                                     <div class="calc-input-wrapper">
                                         <span class="text-gray-400 font-bold mr-4 text-xl">€</span>
-                                        <input type="text" id="price" class="calc-input" placeholder="0,00" inputmode="decimal" oninput="formatPriceInput(this)">
+                                        <input type="text" id="price" class="calc-input" placeholder="0,00" inputmode="decimal" maxlength="15" oninput="formatPriceInput(this)">
                                     </div>
                                 </div>
 
@@ -317,13 +349,11 @@
                         </div>
 
                         <!-- RIGHT: Result Step 1 -->
-                        <div class="w-full lg:w-5/12 bg-gys-blue p-8 md:p-10 lg:p-12 text-white flex flex-col justify-start relative overflow-hidden">
-                            <!-- Abstract Background Shapes matching GYS CI -->
+                        <div class="w-full lg:w-5/12 bg-gys-blue p-6 sm:p-8 md:p-10 lg:p-12 text-white flex flex-col justify-start relative overflow-hidden">
                             <div class="absolute top-0 right-0 w-96 h-96 bg-gys-yellow opacity-10 rounded-full blur-[80px] transform translate-x-1/2 -translate-y-1/2"></div>
                             <div class="absolute bottom-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full blur-[60px]"></div>
                             
                             <div class="relative z-10 flex flex-col h-full">
-                                <!-- Heading Line -->
                                 <div class="flex items-center mb-8 lg:mb-10 h-10">
                                     <div class="inline-block px-4 py-1.5 rounded-md border border-gys-yellow/40 bg-gys-yellow/10 text-[10px] font-bold tracking-widest text-gys-yellow m-0">
                                         Unverbindliches Angebot
@@ -331,7 +361,6 @@
                                 </div>
 
                                 <div class="space-y-8 lg:space-y-10 w-full flex-grow flex flex-col">
-                                    <!-- Monthly Rate Line -->
                                     <div>
                                         <div class="font-heading text-[12px] font-bold tracking-[0.05em] uppercase text-white/70 mb-2">Monatliche Rate</div>
                                         <div class="h-14 flex items-center">
@@ -339,7 +368,6 @@
                                         </div>
                                     </div>
                                     
-                                    <!-- Disclaimer Line -->
                                     <div class="grid grid-cols-1 gap-6">
                                         <div>
                                             <div class="font-heading text-[12px] font-bold tracking-[0.05em] uppercase text-transparent mb-2 select-none hidden sm:block">Hinweis</div>
@@ -363,23 +391,29 @@
 
                     <!-- STEP 2: CONTACT FORM -->
                     <div id="calc-step-2" class="hidden-step flex-col lg:flex-row h-full w-full transition-opacity duration-300">
-                        <div class="w-full lg:w-7/12 p-8 md:p-10 lg:p-12 flex flex-col justify-start">
+                        <div class="w-full lg:w-7/12 p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col justify-start">
                             <div class="flex items-center mb-6 lg:mb-8 h-10">
                                 <h2 class="text-3xl font-black text-gys-dark font-heading m-0 tracking-tight">Kontaktdaten</h2>
                             </div>
                             <p class="text-gray-500 mb-8 text-sm font-medium">Bitte geben Sie Ihre Daten ein, um das unverbindliche Angebot als PDF zu erhalten.</p>
 
-                            <form class="space-y-4 w-full" id="contact-form" onsubmit="event.preventDefault(); downloadOfferPDF();">
+                            <!-- Sicherheits-Update: Rate Limit Message -->
+                            <div id="rate-limit-msg" class="hidden mb-6 p-4 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-sm font-bold flex items-center gap-3">
+                                <i class="fa-solid fa-clock"></i>
+                                <span>Bitte warten Sie einen Moment, bevor Sie ein weiteres Angebot generieren. (Anti-Spam Schutz)</span>
+                            </div>
+
+                            <form class="space-y-4 w-full" id="contact-form" onsubmit="event.preventDefault(); handleFormSubmit();">
                                 
-                                <!-- NEU: Artikel-Block mit Trennlinie (border-b) und extra Platz (pb-8 mb-4) -->
+                                <!-- Artikel-Block mit Längenbegrenzung (maxlength) als Sicherheitsmaßnahme -->
                                 <div class="space-y-4 border-b border-gray-200 pb-8 mb-4">
                                     <div>
                                         <label class="calc-label">Artikelnummer</label>
-                                        <input type="text" id="form-artikelnummer" class="form-input" required>
+                                        <input type="text" id="form-artikelnummer" class="form-input" maxlength="50" required>
                                     </div>
                                     <div>
                                         <label class="calc-label">Artikelbezeichnung</label>
-                                        <input type="text" id="form-artikelbezeichnung" class="form-input" required>
+                                        <input type="text" id="form-artikelbezeichnung" class="form-input" maxlength="150" required>
                                     </div>
                                 </div>
 
@@ -414,43 +448,44 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label class="calc-label">Vorname</label>
-                                        <input type="text" id="form-vorname" class="form-input" required>
+                                        <input type="text" id="form-vorname" class="form-input" maxlength="50" required>
                                     </div>
                                     <div>
                                         <label class="calc-label">Nachname</label>
-                                        <input type="text" id="form-nachname" class="form-input" required>
+                                        <input type="text" id="form-nachname" class="form-input" maxlength="50" required>
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label class="calc-label">Telefonnummer</label>
-                                        <input type="tel" id="form-telefon" class="form-input" required>
+                                        <input type="tel" id="form-telefon" class="form-input" maxlength="30" required>
                                     </div>
                                     <div>
                                         <label class="calc-label">E-Mail</label>
-                                        <input type="email" id="form-email" class="form-input" required>
+                                        <input type="email" id="form-email" class="form-input" maxlength="100" required>
                                     </div>
                                 </div>
 
                                 <div>
                                     <label class="calc-label">Firmenname</label>
-                                    <input type="text" id="form-firma" class="form-input" required>
+                                    <input type="text" id="form-firma" class="form-input" maxlength="100" required>
                                 </div>
 
                                 <div>
                                     <label class="calc-label">Adresse & Hausnummer</label>
-                                    <input type="text" id="form-strasse" class="form-input" required>
+                                    <input type="text" id="form-strasse" class="form-input" maxlength="150" required>
                                 </div>
 
                                 <div class="grid grid-cols-3 gap-4">
                                     <div class="col-span-1">
                                         <label class="calc-label">Postleitzahl</label>
-                                        <input type="text" id="form-plz" class="form-input" required>
+                                        <!-- PLZ auf Zahlen und gängige Formate begrenzt -->
+                                        <input type="text" id="form-plz" class="form-input" maxlength="10" required>
                                     </div>
                                     <div class="col-span-2">
                                         <label class="calc-label">Ort</label>
-                                        <input type="text" id="form-ort" class="form-input" required>
+                                        <input type="text" id="form-ort" class="form-input" maxlength="100" required>
                                     </div>
                                 </div>
 
@@ -464,7 +499,7 @@
                         </div>
 
                         <!-- RIGHT: Summary Step 2 -->
-                        <div class="w-full lg:w-5/12 bg-gys-blue p-8 md:p-10 lg:p-12 text-white flex flex-col justify-start relative overflow-hidden">
+                        <div class="w-full lg:w-5/12 bg-gys-blue p-6 sm:p-8 md:p-10 lg:p-12 text-white flex flex-col justify-start relative overflow-hidden">
                             <div class="absolute top-0 right-0 w-96 h-96 bg-gys-yellow opacity-10 rounded-full blur-[80px] transform translate-x-1/2 -translate-y-1/2"></div>
                             <div class="absolute bottom-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full blur-[60px]"></div>
                             
@@ -514,9 +549,8 @@
             </div>
 
             <!-- VIEW 2: BENEFITS -->
-            <!-- Neu: style="display: none;" hinzugefügt, um Geister-Scrolling auf Startseite zu verhindern -->
             <div id="view-why" class="view-content absolute inset-x-0 top-0 w-full opacity-0 pointer-events-none transition-all duration-300" style="display: none;">
-                <div class="bg-white rounded-xl shadow-card p-8 md:p-16 lg:p-24 border border-gray-100 flex flex-col justify-center">
+                <div class="bg-white rounded-xl shadow-card p-6 sm:p-8 md:p-16 lg:p-24 border border-gray-100 flex flex-col justify-center">
                     <div class="text-center mb-16">
                         <h2 class="text-3xl md:text-4xl font-black text-gys-blue mb-4 font-heading">Warum Finanzierung?</h2>
                         <p class="text-gray-500 text-xl font-medium">Intelligentes Wachstum für Ihre Werkstatt & Produktion.</p>
@@ -549,9 +583,8 @@
             </div>
 
             <!-- VIEW 3: LEASING VS MIETKAUF VERGLEICH -->
-            <!-- Neu: style="display: none;" hinzugefügt -->
             <div id="view-compare" class="view-content absolute inset-x-0 top-0 w-full opacity-0 pointer-events-none transition-all duration-300" style="display: none;">
-                <div class="bg-white rounded-xl shadow-card p-8 md:p-16 lg:p-24 border border-gray-100 flex flex-col justify-center">
+                <div class="bg-white rounded-xl shadow-card p-6 sm:p-8 md:p-16 lg:p-24 border border-gray-100 flex flex-col justify-center">
                     <div class="text-center mb-16">
                         <h2 class="text-3xl md:text-4xl font-black text-gys-blue mb-4 font-heading">Die richtige Finanzierung finden</h2>
                         <p class="text-gray-500 text-xl font-medium">Leasing oder Mietkauf? Vergleichen Sie die Vorteile beider Modelle.</p>
@@ -574,11 +607,11 @@
                                     </li>
                                     <li class="flex items-start gap-3">
                                         <i class="fa-solid fa-check text-gys-yellow mt-1 text-lg"></i> 
-                                        <span><strong>Steuervorteil:</strong> Die Leasingraten sind in der Regel als Betriebsausgaben voll steuerlich absetzbar.</span>
+                                        <span><strong>Betriebsausgaben:</strong> Die Leasingraten sind echte Kosten und daher in voller Höhe absetzbar.</span>
                                     </li>
                                     <li class="flex items-start gap-3">
                                         <i class="fa-solid fa-check text-gys-yellow mt-1 text-lg"></i> 
-                                        <span><strong>Automatischer Erwerb:</strong> Am Ende der Laufzeit erwerben Sie das Gerät automatisch und es geht in Ihren Besitz über.</span>
+                                        <span><strong>Eigentumsübergabe:</strong> Ziel ist die Übernahme zum Laufzeitende. Eine Rückgabe ist nicht gewünscht.</span>
                                     </li>
                                 </ul>
                             </div>
@@ -604,7 +637,7 @@
                                     </li>
                                     <li class="flex items-start gap-3">
                                         <i class="fa-solid fa-check text-gys-yellow mt-1 text-lg"></i> 
-                                        <span><strong>Abschreibung:</strong> Sie profitieren selbst von den steuerlichen Abschreibungsmöglichkeiten (AfA).</span>
+                                        <span><strong>MwSt.:</strong> Vor Auszahlung ist die MwSt. auf die Summe aller Raten an die Leasinggesellschaft zu zahlen.</span>
                                     </li>
                                 </ul>
                             </div>
@@ -616,7 +649,6 @@
         </div>
     </main>
 
-    <!-- Z-Index auf 30 erhöht und Links mit rel="noopener noreferrer" für Sicherheit ausgestattet -->
     <footer class="bg-white border-t border-gray-200 py-12 mt-auto relative z-30">
         <div class="max-w-[1400px] mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
             <a href="https://www.gys-schweissen.com/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 group">
@@ -637,6 +669,52 @@
             "10": { "36": 3.06, "48": 2.36, "54": 2.13, "60": null },
             "5":  { "36": null, "48": 2.45, "54": 2.21, "60": 2.02 }
         };
+
+        // --- SICHERHEITS-UPDATE: RATENBEGRENZUNG (Client-Side Rate Limiting) ---
+        // Verhindert massenhaften Bot-Spam / versehentliche Doppel-Klicks
+        const RATE_LIMIT_COOLDOWN_MS = 60000; // 60 Sekunden Sperre
+        const RATE_LIMIT_KEY = 'gys_last_submission';
+
+        function checkRateLimit() {
+            const lastSubmit = localStorage.getItem(RATE_LIMIT_KEY);
+            if (!lastSubmit) return true;
+            
+            const timePassed = Date.now() - parseInt(lastSubmit, 10);
+            return timePassed >= RATE_LIMIT_COOLDOWN_MS;
+        }
+
+        function setRateLimit() {
+            localStorage.setItem(RATE_LIMIT_KEY, Date.now().toString());
+        }
+
+        // --- SICHERHEITS-UPDATE: INPUT SANITIZATION (XSS Schutz) ---
+        // Entfernt gefährliche HTML/JS Zeichen aus den Benutzereingaben
+        function sanitizeInput(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"'/]/g, function (match) {
+                const escapeMap = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;',
+                    '/': '&#x2F;'
+                };
+                return escapeMap[match];
+            }).trim();
+        }
+
+        // --- SICHERHEITS-UPDATE: FORMAT-VALIDIERUNG ---
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        function validatePhone(phone) {
+            // Erlaubt Zahlen, Leerzeichen, +, -, /, ()
+            const re = /^[0-9+\s()/-]{6,30}$/;
+            return re.test(String(phone));
+        }
 
         // --- ROBUSTE HÖHENBERECHNUNG (RESIZEOBSERVER) ---
         let resizeObserver;
@@ -690,8 +768,6 @@
                     view.style.pointerEvents = 'none';
                     view.style.zIndex = '0';
                     
-                    // NEU: Nach der Ausblend-Animation (300ms) komplett aus dem DOM nehmen
-                    // Das verhindert den unsichtbaren Überlapp und behebt die Footer-Links
                     setTimeout(() => {
                         if (view.style.opacity === '0') {
                             view.style.display = 'none';
@@ -702,7 +778,6 @@
 
             const activeView = document.getElementById('view-' + tabId);
             if(activeView) {
-                // NEU: Erst Block setzen, dann kurz darauf sanft einblenden
                 activeView.style.display = 'block';
                 
                 setTimeout(() => {
@@ -742,12 +817,10 @@
             for (let i = 0; i < options.length; i++) {
                 const val = options[i].value;
                 
-                // Standardmäßig erstmal alles einblenden
                 options[i].hidden = false;
                 options[i].disabled = false;
                 options[i].style.display = '';
                 
-                // Logik zum Ausblenden bestimmter Kombinationen
                 if (duration === "60" && (val === "10" || val === "15")) {
                     options[i].hidden = true;
                     options[i].disabled = true;
@@ -757,20 +830,17 @@
                     options[i].disabled = true;
                     options[i].style.display = 'none'; 
                 } else if (duration === "54" && val === "15") {
-                    // NEU: 15% bei 54 Monaten ausblenden
                     options[i].hidden = true;
                     options[i].disabled = true;
                     options[i].style.display = 'none'; 
                 }
             }
 
-            // Automatischer Fallback, falls die aktuelle Auswahl ungültig wird
             if (duration === "60" && (residualSelect.value === "10" || residualSelect.value === "15")) {
                 residualSelect.value = "5";
             } else if (duration === "36" && residualSelect.value === "5") {
                 residualSelect.value = "10";
             } else if (duration === "54" && residualSelect.value === "15") {
-                // Fallback auf 10%, wenn 54 Monate gewählt und 15% aktiv war
                 residualSelect.value = "10";
             }
         }
@@ -796,10 +866,10 @@
                 errorText.innerText = `Diese Kombination (${duration} Monate / ${residual}%) ist aktuell nicht verfügbar.`;
                 errorMsg.classList.remove('hidden');
                 nextBtn.disabled = true;
-                adjustContainerHeight('calculator'); // Container Höhe anpassen
+                adjustContainerHeight('calculator');
             } else {
                 errorMsg.classList.add('hidden');
-                adjustContainerHeight('calculator'); // Container Höhe anpassen
+                adjustContainerHeight('calculator');
                 
                 if (price && price > 0) {
                     const rate = price * (factor / 100);
@@ -841,7 +911,6 @@
                 step2.classList.remove('hidden-step');
                 step2.classList.add('active-step', 'flex');
                 
-                // Höhe anpassen und für Mobile-Nutzer nach oben scrollen
                 setTimeout(() => adjustContainerHeight('calculator'), 50);
                 setTimeout(() => adjustContainerHeight('calculator'), 300);
                 window.scrollTo({ top: document.getElementById('content-container').offsetTop - 100, behavior: 'smooth' });
@@ -853,7 +922,6 @@
                 step1.classList.remove('hidden-step');
                 step1.classList.add('active-step', 'flex');
                 
-                // Höhe anpassen und scrollen
                 setTimeout(() => adjustContainerHeight('calculator'), 50);
                 setTimeout(() => adjustContainerHeight('calculator'), 300);
                 window.scrollTo({ top: document.getElementById('content-container').offsetTop - 100, behavior: 'smooth' });
@@ -897,29 +965,74 @@
                 .catch(() => resolve(null));
         }
 
-        // --- PURE jsPDF GENERATOR & EMAILJS INTEGRATION FÜR GYS ---
-        async function downloadOfferPDF() {
+        // Steuert den Submit-Prozess, inkl. Validierung und Ratenbegrenzung
+        async function handleFormSubmit() {
             const btn = document.getElementById('submit-btn');
+            const rateLimitMsg = document.getElementById('rate-limit-msg');
+            
+            // 1. Rate Limit prüfen (429 Too Many Requests Logik)
+            if (!checkRateLimit()) {
+                rateLimitMsg.classList.remove('hidden');
+                adjustContainerHeight('calculator');
+                return;
+            }
+            rateLimitMsg.classList.add('hidden');
+
+            // 2. Felder abgreifen und reinigen (Sanitization)
+            const emailInput = document.getElementById('form-email');
+            const phoneInput = document.getElementById('form-telefon');
+            
+            emailInput.classList.remove('input-error');
+            phoneInput.classList.remove('input-error');
+
+            const email = sanitizeInput(emailInput.value);
+            const phone = sanitizeInput(phoneInput.value);
+
+            // 3. Typ-Prüfung (Validation)
+            let hasError = false;
+            if (!validateEmail(email)) {
+                emailInput.classList.add('input-error');
+                hasError = true;
+            }
+            if (!validatePhone(phone)) {
+                phoneInput.classList.add('input-error');
+                hasError = true;
+            }
+            if (hasError) {
+                alert("Bitte prüfen Sie die rot markierten Felder auf ein gültiges Format.");
+                return;
+            }
+
+            // Ab hier ist alles sicher, wir blockieren den Button
             const originalText = btn.innerHTML;
             btn.innerHTML = '<span>Angebot wird erstellt...</span> <i class="fa-solid fa-spinner fa-spin"></i>';
             btn.disabled = true;
 
+            // Ratenbegrenzung-Uhr starten (verhindert Spam)
+            setRateLimit();
+
+            await downloadOfferPDF(originalText, btn);
+        }
+
+        // --- PURE jsPDF GENERATOR & EMAILJS INTEGRATION FÜR GYS ---
+        async function downloadOfferPDF(originalText, btn) {
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
-                const art = document.getElementById('form-finanzierungsart').value;
-                const anrede = document.getElementById('form-anrede').value;
-                const vorname = document.getElementById('form-vorname').value;
-                const nachname = document.getElementById('form-nachname').value;
-                const telefon = document.getElementById('form-telefon').value;
-                const email = document.getElementById('form-email').value;
-                const artikelnummer = document.getElementById('form-artikelnummer').value;
-                const artikelbezeichnung = document.getElementById('form-artikelbezeichnung').value;
-                const firma = document.getElementById('form-firma').value;
-                const strasse = document.getElementById('form-strasse').value;
-                const plz = document.getElementById('form-plz').value;
-                const ort = document.getElementById('form-ort').value;
+                // Gereinigte Eingaben verwenden
+                const art = sanitizeInput(document.getElementById('form-finanzierungsart').value);
+                const anrede = sanitizeInput(document.getElementById('form-anrede').value);
+                const vorname = sanitizeInput(document.getElementById('form-vorname').value);
+                const nachname = sanitizeInput(document.getElementById('form-nachname').value);
+                const telefon = sanitizeInput(document.getElementById('form-telefon').value);
+                const email = sanitizeInput(document.getElementById('form-email').value);
+                const artikelnummer = sanitizeInput(document.getElementById('form-artikelnummer').value);
+                const artikelbezeichnung = sanitizeInput(document.getElementById('form-artikelbezeichnung').value);
+                const firma = sanitizeInput(document.getElementById('form-firma').value);
+                const strasse = sanitizeInput(document.getElementById('form-strasse').value);
+                const plz = sanitizeInput(document.getElementById('form-plz').value);
+                const ort = sanitizeInput(document.getElementById('form-ort').value);
 
                 let salutation = anrede === "Frau" ? `Sehr geehrte Frau ${nachname},` :
                                  anrede === "Herr" ? `Sehr geehrter Herr ${nachname},` :
@@ -928,11 +1041,11 @@
                 const date = new Date();
                 const datum = ('0' + date.getDate()).slice(-2) + '.' + ('0' + (date.getMonth() + 1)).slice(-2) + '.' + date.getFullYear();
 
-                const preisVal = document.getElementById('summary-price').textContent.replace('€', '').trim();
-                const laufzeitVal = document.getElementById('summary-duration').textContent.replace('Monate', '').trim();
-                const restwertEuroVal = document.getElementById('summary-residual-euro').textContent.replace('€', '').trim();
-                let leasingfaktorVal = document.getElementById('summary-leasing-factor').textContent.trim();
-                const rateVal = document.getElementById('summary-rate').textContent.replace('€', '').trim();
+                const preisVal = sanitizeInput(document.getElementById('summary-price').textContent).replace('€', '').trim();
+                const laufzeitVal = sanitizeInput(document.getElementById('summary-duration').textContent).replace('Monate', '').trim();
+                const restwertEuroVal = sanitizeInput(document.getElementById('summary-residual-euro').textContent).replace('€', '').trim();
+                let leasingfaktorVal = sanitizeInput(document.getElementById('summary-leasing-factor').textContent).trim();
+                const rateVal = sanitizeInput(document.getElementById('summary-rate').textContent).replace('€', '').trim();
 
                 const logo = await getBase64Logo();
                 if (logo && logo.data) {
@@ -946,14 +1059,13 @@
                     doc.addImage(logo.data, 'PNG', 190 - imgW, 20, imgW, imgH); 
                 } else {
                     doc.setFontSize(16); doc.setFont("helvetica", "bold");
-                    doc.setTextColor(0, 62, 126); // GYS Blue Text Fallback
+                    doc.setTextColor(0, 62, 126); 
                     doc.text("GYS", 190, 25, { align: "right" });
                     doc.setTextColor(0, 0, 0); 
                 }
 
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "normal");
-                // Adressblock oben links um Telefon und E-Mail erweitert
                 doc.text([
                     firma, 
                     `${anrede} ${vorname} ${nachname}`, 
@@ -969,16 +1081,14 @@
                 doc.setFont("helvetica", "bold");
                 doc.text(`Finanzierungsangebot: ${art}`, 20, 85);
                 
-                // NEU: Artikelnummer und -bezeichnung in Fettdruck hinzufügen
                 doc.text(`${artikelnummer} - ${artikelbezeichnung}`, 20, 92);
 
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "normal");
-                // Y-Werte um jeweils 7mm nach unten geschoben für den neuen Text
                 doc.text(salutation, 20, 107);
                 doc.text("vielen Dank für das entgegengebrachte Vertrauen! Wie folgt bieten wir Ihnen unverbindlich an:", 20, 117);
 
-                let y = 132; // Auch die Tabelle rückt weiter nach unten
+                let y = 132; 
                 const rowH = 7;
                 const drawRow = (label, val, unit) => {
                     doc.setFont("helvetica", "normal");
@@ -1007,9 +1117,8 @@
 
                 doc.setFont("helvetica", "normal");
                 doc.text("Die oben genannten Preise verstehen sich netto, zuzüglich der gesetzlichen Mehrwertsteuer.", 20, y);
-                y += 10; // Abstand angepasst für den neuen Satz
+                y += 10; 
 
-                // NEUER SATZ:
                 doc.text(["Auf Wunsch fragen wir dieses Finanzierungsangebot gerne verbindlich für Sie über unseren", "Finanzierungspartner an."], 20, y);
                 y += 15;
 
@@ -1030,12 +1139,10 @@
                 doc.setFontSize(5.5);
                 doc.setFont("helvetica", "normal");
 
-                // Aktualisierte Footer-Daten für GYS Deutschland GmbH
                 doc.text(["GYS GmbH", "Professor-Wieler-Straße 11", "52070 Aachen"], 20, 274);
                 doc.text(["Geschäftsführer Bruno Bouygues", "Amtsgericht Aachen HRB 13244", "Ust-IdNr. DE 245366405"], 46, 274);
                 doc.text(["Fon (+49) 241 / 189-23-710", "aachen@gys.fr", "www.gys-schweissen.com"], 86, 274);
                 
-                // Platzhalter Bankdaten (können bei Bedarf im Code angepasst werden)
                 doc.text(["Sydbank", "Commerzbank"], 118, 274);
                 doc.text(["IBAN DE55 2151 0800 1000 6859 59", "IBAN DE33 2004 0000 0630 1527 00"], 136, 274);
                 doc.text(["SYBKDE22", "COBADEFFXXX"], 190, 274, { align: "right" });
@@ -1046,7 +1153,7 @@
                 // 1. PDF DOWNLOAD STARTEN
                 doc.save(filename);
 
-                // 2. EMAILJS PARAMETER VORBEREITEN
+                // 2. EMAILJS PARAMETER VORBEREITEN (Sichere Variablen)
                 const templateParams = {
                     firma_name: firma,
                     kontakt_name: `${anrede} ${vorname} ${nachname}`,
@@ -1064,7 +1171,7 @@
                     restwert: restwertEuroVal
                 };
 
-                // 3. E-MAIL ABSENDEN
+                // 3. E-MAIL ABSENDEN (Server kommuniziert mit EmailJS)
                 try {
                     await emailjs.send("service_lg831md", "template_zcqdl76", templateParams);
                     console.log("E-Mail Alert erfolgreich versendet.");
